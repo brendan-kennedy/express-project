@@ -1,6 +1,6 @@
 const morgan = require('morgan')
 const express = require('express')
-
+const {uniqueId} = require('lodash')
 const app = express()
 const port = 8080
 
@@ -39,10 +39,24 @@ app.get('/students/:studentID', (req, res) => {
     }
 })
 
-app.post('/', (req, res) => {
-    const {studentId, grade} =  req.params
+app.post('/grades/', (req, res) => {
+    const {studentId, grade} =  req.body
+    if (!students[studentId]) {
+        res.status(404).send(`Student ${studentId} not found`)
+    }else{ 
+        students[studentId].grades.push(grade)
+        res.status(200).send(`Grades updated for student ${studentId}`)
+    }
 })
 
+app.post('/register', (req, res) => {
+    const newId =  uniqueId()
+    const student = req.body
+    student.id = newId
+    student.grades = []
+    students[newId] = student
+    res.status(201).send(`Student saved and assigned id: ${newId}`)
 
+});
 
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
